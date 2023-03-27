@@ -1,0 +1,3 @@
+#openmim
+#mmcv-full
+#mmdet
