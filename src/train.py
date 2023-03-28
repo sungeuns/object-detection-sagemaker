@@ -4,8 +4,6 @@ import shutil
 from pprint import pprint
 import yaml
 
-# from autogluon.tabular import TabularDataset, TabularPredictor
-
 from autogluon.multimodal import MultiModalPredictor
 
 
@@ -77,11 +75,14 @@ if __name__ == "__main__":
     # ---------------------------------------------------------------- Training
     
     train_dir = args.train_dir
+    
+    # config 명시로 변경필요
     train_path = os.path.join(train_dir, "Annotations", "usersplit_train_cocoformat.json")
     
     model_path = args.model_dir
-    
-    checkpoint_name = "yolox_x_8x8_300e_coco"
+        
+    # config 명시로 변경필요
+    checkpoint_name = "yolox_x_8x8_300e_coco"  
     num_gpus = -1  # use all GPUs
     val_metric = "map"
     
@@ -96,6 +97,7 @@ if __name__ == "__main__":
         path=model_path
     )
     
+    # hyperparam 또한 config명시로 변경필요
     predictor.fit(
         train_path,
         hyperparameters={
