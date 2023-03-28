@@ -64,7 +64,7 @@ if __name__ == "__main__":
     os.makedirs(args.output_data_dir, mode=0o777, exist_ok=True)
 
     hyper_params = json.loads(os.environ['SM_HPS'])
-    print(f"Hyper-parameters from SageMaker job trigger: {hyper_params}"
+    print(f"Hyper-parameters from SageMaker job trigger: {hyper_params}")
     # ---------------------------------------------------------------- Training
     
     train_dir = args.train_dir
@@ -90,10 +90,10 @@ if __name__ == "__main__":
     predictor.fit(
         train_path,
         hyperparameters={
-            "optimization.learning_rate": hyper_params["learning_rate"]
-            "optimization.max_epochs": hyper_params["max_epochs"]
-            "optimization.check_val_every_n_epoch": hyper_params["check_val_every_n_epoch"]
-            "env.per_gpu_batch_size": hyper_params["per_gpu_batch_size"]
+            "optimization.learning_rate": hyper_params["learning_rate"],
+            "optimization.max_epochs": hyper_params["max_epochs"],
+            "optimization.check_val_every_n_epoch": hyper_params["check_val_every_n_epoch"],
+            "env.per_gpu_batch_size": hyper_params["per_gpu_batch_size"],
         },
     )
 
