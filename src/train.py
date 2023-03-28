@@ -1,5 +1,6 @@
 import argparse
 import os
+import json
 import shutil
 from pprint import pprint
 import yaml
@@ -62,29 +63,17 @@ if __name__ == "__main__":
     # See SageMaker-specific environment variables: https://sagemaker.readthedocs.io/en/stable/overview.html#prepare-a-training-script
     os.makedirs(args.output_data_dir, mode=0o777, exist_ok=True)
 
-#     config_file = get_input_path(args.ag_config)
-#     with open(config_file) as f:
-#         config = yaml.safe_load(f)  # AutoGluon-specific config
-
-#     if args.n_gpus:
-#         config["num_gpus"] = int(args.n_gpus)
-
-#     print("Running training job with the config:")
-#     pprint(config)
-
+    hyper_params = json.loads(os.environ['SM_HPS'])
+    print(f"Hyper-parameters from SageMaker job trigger: {hyper_params}"
     # ---------------------------------------------------------------- Training
     
     train_dir = args.train_dir
-    
-    # config 명시로 변경필요
-    train_path = os.path.join(train_dir, "Annotations", "usersplit_train_cocoformat.json")
-    
     model_path = args.model_dir
-        
-    # config 명시로 변경필요
-    checkpoint_name = "yolox_x_8x8_300e_coco"  
-    num_gpus = -1  # use all GPUs
-    val_metric = "map"
+    
+    train_path = os.path.join(train_dir, hyper_params["annotation_path"])
+    checkpoint_name = hyper_params["checkpoint_name"]
+    num_gpus = hyper_params["num_gpus"]
+    val_metric = hyper_params["val_metric"]
     
     predictor = MultiModalPredictor(
         hyperparameters={
@@ -101,23 +90,12 @@ if __name__ == "__main__":
     predictor.fit(
         train_path,
         hyperparameters={
-            "optimization.learning_rate": 5e-6, # we use two stage and detection head has 100x lr
-            "optimization.max_epochs": 1,   # for the real use case, at least 50
-            "optimization.check_val_every_n_epoch": 1, # make sure there is at least one validation
-            "env.per_gpu_batch_size": 2,  # decrease it when model is large
+            "optimization.learning_rate": hyper_params["learning_rate"]
+            "optimization.max_epochs": hyper_params["max_epochs"]
+            "optimization.check_val_every_n_epoch": hyper_params["check_val_every_n_epoch"]
+            "env.per_gpu_batch_size": hyper_params["per_gpu_batch_size"]
         },
     )
-
-#     train_file = get_input_path(args.train_dir)
-#     train_data = TabularDataset(train_file)
-
-#     save_path = os.path.normpath(args.model_dir)
-
-#     ag_predictor_args = config["ag_predictor_args"]
-#     ag_predictor_args["path"] = save_path
-#     ag_fit_args = config["ag_fit_args"]
-    
-#     predictor = TabularPredictor(**ag_predictor_args).fit(train_data, **ag_fit_args)
 
     # --------------------------------------------------------------- Inference
 
